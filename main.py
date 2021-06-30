@@ -1,100 +1,126 @@
-import os
-import time
-
-board = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
-player = 1
-
-########win Flags##########
-
-Win = 1
-Draw = -1
-Running = 0
-Stop = 1
-###########################
-Game = Running
-Mark = 'X'
+board = [' ' for x in range(10)]
 
 
-# This Function Draws Game Board
-def DrawBoard():
-    print(" %c | %c | %c " % (board[1], board[2], board[3]))
-    print("___|___|___")
-    print(" %c | %c | %c " % (board[4], board[5], board[6]))
-    print("___|___|___")
-    print(" %c | %c | %c " % (board[7], board[8], board[9]))
-    print("   |   |   ")
+def insertLetter(letter, pos):
+    board[pos] = letter
 
 
-# This Function Checks position is empty or not
-def CheckPosition(x):
-    if (board[x] == ' '):
-        return True
-    else:
+def spaceIsFree(pos):
+    return board[pos] == ' '
+
+
+def printBoard(board):
+    print('   |   |')
+    print(' ' + board[1] + ' | ' + board[2] + ' | ' + board[3])
+    print('   |   |')
+    print('-----------')
+    print('   |   |')
+    print(' ' + board[4] + ' | ' + board[5] + ' | ' + board[6])
+    print('   |   |')
+    print('-----------')
+    print('   |   |')
+    print(' ' + board[7] + ' | ' + board[8] + ' | ' + board[9])
+    print('   |   |')
+
+
+def isWinner(bo, le):
+    return (bo[7] == le and bo[8] == le and bo[9] == le) or (bo[1] == le and bo[2] == le and bo[3] == le) or (
+                bo[4] == le and bo[5] == le and bo[6] == le) or (bo[2] == le and bo[5] == le and bo[8] == le) or (
+                       bo[1] == le and bo[4] == le and bo[7] == le) or (
+                       bo[3] == le and bo[6] == le and bo[9] == le) or (
+                       bo[1] == le and bo[5] == le and bo[9] == le) or (bo[3] == le and bo[5] == le and bo[7] == le)
+
+
+def playerMove():
+    run = True
+    while run:
+        move = input('please select a position to place an \'x\' (1-9): ')
+        try:
+            move = int(move)
+            if move > 0 and move < 10:
+                if spaceIsFree(move):
+                    run = False
+                    insertLetter('x', move)
+                else:
+                    print('sorry , this space is occupied! ')
+
+            else:
+                print(' please type a number within the range!')
+        except:
+            print('please type a number!')
+
+
+def compMove():
+    possibleMoves = [x for x, letter in enumerate(board) if letter == ' ' and x != 0]
+    move = 0
+
+    for let in ['o', 'x']:
+        for i in possibleMoves:
+            boardCopy = board[:]
+            boardCopy[i] = let
+            if isWinner(boardCopy, let):
+                move = i
+                return move
+    cornersOpen = []
+    for i in possibleMoves:
+        if i in [1, 3, 7, 9]:
+            cornersOpen.append(i)
+    if len(cornersOpen) > 0:
+        move = selectRandom(cornersOpen)
+        return move
+    if 5 in possibleMoves:
+        move = 5
+        return move
+    edgesOpen = []
+    for i in possibleMoves:
+        if i in [2, 4, 6, 8]:
+            edgesOpen.append(i)
+    if len(edgesOpen) > 0:
+        move = selectRandom(edgesOpen)
+        return move
+
+
+def selectRandom(li):
+    import random
+    ln = len(li)
+    r = random.randrange(0, ln)
+    return li[r]
+
+
+def isBoardFull(board):
+    if board.count(' ') > 1:
         return False
-
-    # This Function Checks player has won or not
-
-
-def CheckWin():
-    global Game
-    # Horizontal winning condition
-    if (board[1] == board[2] and board[2] == board[3] and board[1] != ' '):
-        Game = Win
-    elif (board[4] == board[5] and board[5] == board[6] and board[4] != ' '):
-        Game = Win
-    elif (board[7] == board[8] and board[8] == board[9] and board[7] != ' '):
-        Game = Win
-        # Vertical Winning Condition
-    elif (board[1] == board[4] and board[4] == board[7] and board[1] != ' '):
-        Game = Win
-    elif (board[2] == board[5] and board[5] == board[8] and board[2] != ' '):
-        Game = Win
-    elif (board[3] == board[6] and board[6] == board[9] and board[3] != ' '):
-        Game = Win
-        # Diagonal Winning Condition
-    elif (board[1] == board[5] and board[5] == board[9] and board[5] != ' '):
-        Game = Win
-    elif (board[3] == board[5] and board[5] == board[7] and board[5] != ' '):
-        Game = Win
-        # Match Tie or Draw Condition
-
-    elif (board[1] != ' ' and board[2] != ' ' and board[3] != ' ' and board[4] != ' ' and board[5] != ' ' and board[
-        6] != ' ' and board[7] != ' ' and board[8] != ' ' and board[9] != ' '):
-        Game = Draw
     else:
-        Game = Running
+        return True
 
 
-print("Tic-Tac-Toe Game Designed By gauri tanwar ")
-print("Player 1 [X] --- Player 2 [O]\n")
-print()
-print()
-print("Please Wait...")
-time.sleep(3)
-while (Game == Running):
-    os.system('cls')
-    DrawBoard()
-    if (player % 2 != 0):
-        print("Player 1's chance")
-        Mark = 'X'
-    else:
-        print("Player 2's chance")
-        Mark = 'O'
-    choice = int(input("Enter the position between [1-9] where you want to mark : "))
-    if (CheckPosition(choice)):
-        board[choice] = Mark
-        player += 1
-        CheckWin()
-os.system('cls')
-DrawBoard()
-if (Game == Draw):
-    print("Game Draw")
-elif (Game == Win):
-    player -= 1
-    if (player % 2 != 0):
-        print("Player 1 Won")
-    else:
-        print("Player 2 Won")
+def main():
+    print('wlc to tic tac toe!,\n designed by Gauri Tanwar')
+    printBoard(board)
 
+    while not (isBoardFull(board)):
+        if not (isWinner(board, 'o')):
+            playerMove()
+            printBoard(board)
+        else:
+            print('sorry, o\'s won the game!')
+            break
+        if not (isWinner(board, 'x')):
+
+            move = compMove()
+            if isBoardFull(board):
+                print(' tie game ')
+            else:
+                insertLetter('o', move)
+                print('computer placed an \'o\' in position', move, ':')
+                printBoard(board)
+        else:
+            print('x\'s won this gamen!good job!')
+            break
+    if isBoardFull(board):
+        print('Tie Game!')
+
+
+main()
 
 
